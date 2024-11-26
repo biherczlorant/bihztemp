@@ -5,4 +5,4 @@ void init_display(void);
 
 void display_test(char* string);
 
-#endif // COMPONENTS_DISPLAY_DISPLAY_H_
+#endif  // COMPONENTS_DISPLAY_DISPLAY_H_
