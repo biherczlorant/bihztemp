@@ -4,3 +4,6 @@
 [submodule "components/ESP8266-RTOS-FONTS"]
 	path = components/ESP8266-RTOS-FONTS
 	url = https://github.com/Fonger/ESP8266-RTOS-FONTS.git
+[submodule "components/ESP8266-RTOS-DHT"]
+	path = components/ESP8266-RTOS-DHT
+	url = https://github.com/Fonger/ESP8266-RTOS-DHT.git
