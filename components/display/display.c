@@ -21,7 +21,7 @@ static ssd1306_t display = {.i2c_port = I2C_NUM_0,
 
 static uint8_t buffer[DISPLAY_WIDTH * DISPLAY_HEIGHT / 8] = {0};
 
-void init_display(void) {
+void display_init(void) {
     i2c_config_t conf;
     conf.mode = I2C_MODE_MASTER;
     conf.sda_io_num = SDA_PIN;
@@ -47,6 +47,25 @@ void display_test(char* string) {
     int err = ssd1306_draw_string(&display, buffer, font, 0, 0, string,
                                   OLED_COLOR_WHITE, OLED_COLOR_BLACK);
     if (err) ESP_LOGE("display", "couldnt draw string");
+
+    err = ssd1306_load_frame_buffer(&display, buffer);
+    if (err) ESP_LOGE("display", "couldnt add to buffer");
+}
+
+void display_temp_and_hum_screen(char* temperature, char* humidity) {
+    uint8_t templen = sizeof(temperature);
+    uint8_t humidlen = sizeof(humidity);
+
+    ssd1306_set_whole_display_lighting(&display, false);
+    const font_info_t* font = font_builtin_fonts[FONT_FACE_TERMINUS_6X12_ISO8859_1];
+    int err = ssd1306_draw_string(&display, buffer, font, (DISPLAY_WIDTH/2)-(templen*6), 23, temperature,
+                                  OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    if (err) ESP_LOGE("display", "couldnt draw temperature");
+
+    err = ssd1306_draw_string(&display, buffer, font, (DISPLAY_WIDTH/2)-(humidlen*6), 34, humidity,
+                                  OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    if (err) ESP_LOGE("display", "couldnt draw humidity");
+
     err = ssd1306_load_frame_buffer(&display, buffer);
     if (err) ESP_LOGE("display", "couldnt add to buffer");
 }

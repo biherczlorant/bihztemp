@@ -4,7 +4,7 @@
 #include <task.h>
 
 int app_main(void) {
-    init_display();
-    display_test("test");
+    display_init();
+    display_temp_and_hum_screen("21\xb0" "C", "70%");
     return 0;
 }
