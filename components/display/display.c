@@ -7,6 +7,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <ssd1306/ssd1306.h>
+#include <string.h>
 
 #define SCL_PIN 14
 #define SDA_PIN 2
@@ -53,17 +54,23 @@ void display_test(char* string) {
 }
 
 void display_temp_and_hum_screen(char* temperature, char* humidity) {
-    uint8_t templen = sizeof(temperature);
-    uint8_t humidlen = sizeof(humidity);
+    uint8_t templen = strlen(temperature);
+    uint8_t humidlen = strlen(humidity);
+
+    int temperaturey = (DISPLAY_HEIGHT / 2) - (26 / 2);
+    int humidityy = temperaturey + 12 + 2;
 
     ssd1306_set_whole_display_lighting(&display, false);
-    const font_info_t* font = font_builtin_fonts[FONT_FACE_TERMINUS_6X12_ISO8859_1];
-    int err = ssd1306_draw_string(&display, buffer, font, (DISPLAY_WIDTH/2)-(templen*6), 23, temperature,
-                                  OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    const font_info_t* font =
+        font_builtin_fonts[FONT_FACE_TERMINUS_6X12_ISO8859_1];
+    int err = ssd1306_draw_string(
+        &display, buffer, font, (DISPLAY_WIDTH / 2) - (templen * 6 / 2), temperaturey,
+        temperature, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
     if (err) ESP_LOGE("display", "couldnt draw temperature");
 
-    err = ssd1306_draw_string(&display, buffer, font, (DISPLAY_WIDTH/2)-(humidlen*6), 34, humidity,
-                                  OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    err = ssd1306_draw_string(&display, buffer, font,
+                              (DISPLAY_WIDTH / 2) - (humidlen * 6 / 2), humidityy,
+                              humidity, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
     if (err) ESP_LOGE("display", "couldnt draw humidity");
 
     err = ssd1306_load_frame_buffer(&display, buffer);
