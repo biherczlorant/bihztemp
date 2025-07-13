@@ -3,7 +3,7 @@
 
 void display_init(void);
 
-void display_test(char* string);
+void display_write_str_middle(char* string);
 void display_temp_and_hum_screen(char* temperature, char* humidity);
 
 #endif  // COMPONENTS_DISPLAY_DISPLAY_H_
