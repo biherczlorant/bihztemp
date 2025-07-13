@@ -1,0 +1,15 @@
+set(COMPONENT_SRCDIRS
+  "."
+)
+
+set(COMPONENT_ADD_INCLUDEDIRS
+  "."
+)
+
+set(COMPONENT_REQUIRES
+    ESP8266-RTOS-FONTS
+    ESP8266-RTOS-SSD1306
+    network
+)
+
+register_component()
