@@ -1,0 +1,8 @@
+menu "network"
+
+config API_SERVER_URL
+    string "API server URL"
+    help 
+        "The URL to the server you want to upload data to"
+
+endmenu

@@ -9,6 +9,8 @@
 #include <ssd1306/ssd1306.h>
 #include <string.h>
 
+#include "network.h"
+
 #define SCL_PIN 14
 #define SDA_PIN 2
 #define DISPLAY_WIDTH 128
@@ -22,6 +24,8 @@ static ssd1306_t display = {.i2c_port = I2C_NUM_0,
 
 static uint8_t buffer[DISPLAY_WIDTH * DISPLAY_HEIGHT / 8] = {0};
 
+static const char* TAG = "display";
+
 void display_init(void) {
     i2c_config_t conf;
     conf.mode = I2C_MODE_MASTER;
@@ -34,45 +38,49 @@ void display_init(void) {
     ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &conf));
 
     while (ssd1306_init(&display) != 0) {
-        ESP_LOGE("display", "couldn't init display");
+        ESP_LOGE(TAG, "couldn't init display");
         vTaskDelay(100);
     }
     ssd1306_set_segment_remapping_enabled(&display, true);
     ssd1306_set_scan_direction_fwd(&display, false);
-    ESP_LOGI("display", "initialized display");
-}
-
-void display_test(char* string) {
     ssd1306_set_whole_display_lighting(&display, false);
-    const font_info_t* font = font_builtin_fonts[FONT_FACE_GLCD5x7];
-    int err = ssd1306_draw_string(&display, buffer, font, 0, 0, string,
-                                  OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    if (err) ESP_LOGE("display", "couldnt draw string");
-
-    err = ssd1306_load_frame_buffer(&display, buffer);
-    if (err) ESP_LOGE("display", "couldnt add to buffer");
+    ESP_LOGI(TAG, "initialized display");
 }
 
 void display_temp_and_hum_screen(char* temperature, char* humidity) {
     uint8_t templen = strlen(temperature);
     uint8_t humidlen = strlen(humidity);
 
-    int temperaturey = (DISPLAY_HEIGHT / 2) - (26 / 2);
+    int temperaturey = (DISPLAY_HEIGHT / 2) - 12;
     int humidityy = temperaturey + 12 + 2;
+
+    memset(&buffer, 0, DISPLAY_WIDTH * DISPLAY_HEIGHT / 8);
 
     ssd1306_set_whole_display_lighting(&display, false);
     const font_info_t* font =
         font_builtin_fonts[FONT_FACE_TERMINUS_6X12_ISO8859_1];
-    int err = ssd1306_draw_string(
-        &display, buffer, font, (DISPLAY_WIDTH / 2) - (templen * 6 / 2), temperaturey,
-        temperature, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    if (err) ESP_LOGE("display", "couldnt draw temperature");
 
-    err = ssd1306_draw_string(&display, buffer, font,
-                              (DISPLAY_WIDTH / 2) - (humidlen * 6 / 2), humidityy,
-                              humidity, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    if (err) ESP_LOGE("display", "couldnt draw humidity");
+    char wifi_status[33];
+    if (network_is_connected()) {
+        const uint8_t* ap_name = network_get_ap_name();
+        snprintf(wifi_status, sizeof(wifi_status), "%s", ap_name);
+    } else {
+        snprintf(wifi_status, sizeof(wifi_status), "No WiFi");
+    }
 
-    err = ssd1306_load_frame_buffer(&display, buffer);
-    if (err) ESP_LOGE("display", "couldnt add to buffer");
+    ssd1306_draw_rectangle(&display, buffer, (DISPLAY_WIDTH / 2) - (templen * 6 / 2) - 3, temperaturey - 3, templen * 6 + 6, 32, OLED_COLOR_WHITE);
+
+    ssd1306_draw_string(&display, buffer, font, 0, 0, wifi_status,
+                                  OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+    ssd1306_draw_string(&display, buffer, font,
+                        (DISPLAY_WIDTH / 2) - (templen * 6 / 2), temperaturey,
+                        temperature, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+    ssd1306_draw_string(&display, buffer, font,
+                        (DISPLAY_WIDTH / 2) - (humidlen * 6 / 2), humidityy,
+                        humidity, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+    int err = ssd1306_load_frame_buffer(&display, buffer);
+    if (err) ESP_LOGE(TAG, "couldnt add to buffer");
 }

@@ -7,9 +7,7 @@ set(COMPONENT_ADD_INCLUDEDIRS
 )
 
 set(COMPONENT_REQUIRES
-    ESP8266-RTOS-FONTS
-    ESP8266-RTOS-SSD1306
-    network
+    "nvs_flash"
+    "ESP8266-RTOS-DHT"
 )
-
 register_component()
